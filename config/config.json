@@ -1,0 +1,9 @@
+{
+  "dev": {
+    "username": "root",
+    "password": "root",
+    "database": "node_skeleton",
+    "host": "127.0.0.1",
+    "dialect": "mysql"
+  }
+}
