@@ -1,5 +1,5 @@
 const Sequelize = require('sequelize');
-module.exports = function(){
+module.exports = function () {
     return {
         id: {
             type: Sequelize.INTEGER(20),
@@ -21,6 +21,11 @@ module.exports = function(){
         },
         phone: {
             type: Sequelize.NUMBER,
+            unique: true,
+            allowNull: true
+        },
+        email: {
+            type: Sequelize.STRING,
             unique: true,
             allowNull: true
         },

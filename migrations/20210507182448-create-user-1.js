@@ -17,6 +17,23 @@ module.exports = {
       access_token: {
         type: Sequelize.STRING
       },
+      phone: {
+            type: Sequelize.NUMBER,
+            unique: true,
+            allowNull: true
+        },
+        country_code: {
+            type: Sequelize.STRING,
+            allowNull: true
+        },
+        image_path: {
+            type: Sequelize.STRING(255),
+            allowNull: true
+        },
+        password: {
+            type: Sequelize.STRING(255),
+            allowNull: true
+        },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE

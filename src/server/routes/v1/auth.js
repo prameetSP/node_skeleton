@@ -2,6 +2,7 @@ const md5 = require('md5');
 const fs = require('fs');
 const path = require('path');
 const async = require('async');
+const multer = require('multer');
 const HTTPStatus = require('http-status');
 
 const { check, validationResult } = require('express-validator');
@@ -9,10 +10,24 @@ const { check, validationResult } = require('express-validator');
 module.exports = function (app, wagner) {
 
   let authMiddleware = wagner.get('auth');
-
+  const storage = multer.diskStorage({
+    limits: { fileSize: 10000 },
+    destination: function (req, file, cb) {
+      cb(null, 'src/public/uploads');
+    },
+    filename: (req, file, cb) => {
+      cb(null, Date.now() + file.originalname)
+    }
+  })
+  const upload = multer({
+    storage,
+    fileFilter: (req, file, cb) => {
+      cb(null, Date.now() + file.originalname)
+    }
+  });
   // role : any
   // function :  signup
-  app.post('/v1/auth/:user/signup', [check('firstName').exists(), check('lastName').exists()], async function (req, res) {
+  app.post('/v1/auth/:user/signup', upload.single('image'), [check('firstName').exists(), check('lastName').exists()], async function (req, res) {
 
     try {
       const errors = validationResult(req);
@@ -25,6 +40,10 @@ module.exports = function (app, wagner) {
 
           firstName: req.body.firstName,
           lastName: req.body.lastName,
+          email: req.body.email,
+          phone: req.body.phone,
+          password:md5(req.body.password),
+          image_path: req.file.path,
         }
         let user = await wagner.get('Users')["insert"](req)
 
@@ -68,81 +87,78 @@ module.exports = function (app, wagner) {
   // role : any
   // function :  signin
   app.post('/v1/auth/:user/signin', [
-  check('password').exists(), check('device_token').exists()], async function (req, res) {
+    check('password').exists(), check('email').exists()], async function (req, res) {
 
-    try {
-      const errors = validationResult(req);
-      if (!errors.isEmpty()) {
-        let lasterr = errors.array().pop();
-        lasterr.message = lasterr.msg + ": " + lasterr.param.replace("_", " ");
-        console.log('lasterr',lasterr)
-        return res.status(405).json({ success: '0', message: "failure", data: lasterr });
-      } else {
-
-        req.userObj = {
-          firstName: req.body.email,
-          lastName: req.body.password
-        }
-        let vendorlist = []
-        let user = await wagner.get('Users')["find"](req);
-        console.log("req.userObj", req.userObj)
-        if (user) {
-          req.user_id = user._id
-
-          let authtoken = await wagner.get('auth')["generateAccessToken"](req, res);
-          // console.log(authtoken)
-          req.tokenObj = {
-            authToken: authtoken,
-            deviceToken: req.body.device_token,
-            // appType : req.params.user == "user"? "customer" : "vendor"
-          }
-          //let token = await wagner.get('Tokens')["insert"](req, res);
-          /* req.userObj = {
-            filter: {
-              _id: user._id
-            },
-            update: {
-              is_active: true,
-              $push: { tokens: token._id }
-            }
-          } */
-          //await wagner.get('Users')["update"](req)
-          //vendorlist = await wagner.get('VendorUsers')["findAll"](req);
-
-          // Activate vendor profile on login
-          /*
-          if(req.params.user == 'vendor' ){
-            vendorlist = await wagner.get('VendorUsers')["findAll"](req);
-            req.vendorList = [];
-            if(vendorlist){
-              vendorlist.map((e)=>{
-                req.vendorList.push(e.vendor._id)
-              })
-            }
-            await wagner.get('Vendors')["activateVendor"](req);
-          }
-          */
-
-          res.status(HTTPStatus.OK).json({
-            success: '1', message: "success", data: {
-              authtoken, profile: {
-                firstname: user.firstName,
-                lastname: user.lastName,
-              }
-            }
-          });
+      try {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+          let lasterr = errors.array().pop();
+          lasterr.message = lasterr.msg + ": " + lasterr.param.replace("_", " ");
+          console.log('lasterr', lasterr)
+          return res.status(405).json({ success: '0', message: "failure", data: lasterr });
         } else {
-          res.status(401).json({ success: '0', message: "failure", data: { "message": "Invalid username and password!" } });
+
+          req.userObj = {
+            email: req.body.email,
+            password: md5(req.body.password)
+          }
+          let vendorlist = []
+          let user = await wagner.get('Users')["find"](req);
+          console.log("req.userObj", req.userObj)
+          if (user) {
+            req.user_id = user._id
+
+            let authtoken = await wagner.get('auth')["generateAccessToken"](req, res);
+            // console.log(authtoken)
+            req.tokenObj = {
+              authToken: authtoken,
+              deviceToken: req.body.device_token,
+              // appType : req.params.user == "user"? "customer" : "vendor"
+            }
+            //let token = await wagner.get('Tokens')["insert"](req, res);
+            /* req.userObj = {
+              filter: {
+                _id: user._id
+              },
+              update: {
+                is_active: true,
+                $push: { tokens: token._id }
+              }
+            } */
+            //await wagner.get('Users')["update"](req)
+            //vendorlist = await wagner.get('VendorUsers')["findAll"](req);
+
+            // Activate vendor profile on login
+            /*
+            if(req.params.user == 'vendor' ){
+              vendorlist = await wagner.get('VendorUsers')["findAll"](req);
+              req.vendorList = [];
+              if(vendorlist){
+                vendorlist.map((e)=>{
+                  req.vendorList.push(e.vendor._id)
+                })
+              }
+              await wagner.get('Vendors')["activateVendor"](req);
+            }
+            */
+
+            res.status(HTTPStatus.OK).json({
+              success: '1', message: "success", data: {
+                authtoken, profile:user
+              }
+            });
+          } else {
+            res.status(401).json({ success: '0', message: "failure", data: { "message": "Invalid username and password!" } });
+          }
+
         }
-
       }
-    }
-    catch (e) {
-      console.log(e)
-      res.status(500).json({ success: '0', message: "failure", data: e });
-    }
+      catch (e) {
+        console.log(e)
+        res.status(500).json({ success: '0', message: "failure", data: e });
+      }
 
-  });
+    });
 
   // role : customer
   // function :  socialSignIn
