@@ -2,6 +2,10 @@
     "app_route": "http://localhost:3000/",
     "bot_account": "rahulsps",
     "google_analytics": "",
+    "JWT":{
+        "SECRET":"6dcc80c4cc5b3daa1483ae96fb449235",
+        "TOKENTIME":"365 days"
+    },
     "db": {
         "database": "node_skeleton",
         "username": "root",

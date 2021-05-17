@@ -5,5 +5,10 @@ module.exports = function(wagner) {
     ForeverPosts = require('./shop');
     return new ForeverPosts(wagner);
   });
+  wagner.factory('Users', function() {
+    var ForeverPosts;
+    ForeverPosts = require('./users');
+    return new ForeverPosts(wagner);
+  });
 
 };
