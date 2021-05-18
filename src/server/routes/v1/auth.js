@@ -42,7 +42,7 @@ module.exports = function (app, wagner) {
           lastName: req.body.lastName,
           email: req.body.email,
           phone: req.body.phone,
-          password:md5(req.body.password),
+          password: md5(req.body.password),
           image_path: req.file.path,
         }
         let user = await wagner.get('Users')["insert"](req)
@@ -104,18 +104,19 @@ module.exports = function (app, wagner) {
           }
           let vendorlist = []
           let user = await wagner.get('Users')["find"](req);
-          console.log("req.userObj", req.userObj)
+        
           if (user) {
             req.user_id = user._id
 
             let authtoken = await wagner.get('auth')["generateAccessToken"](req, res);
             // console.log(authtoken)
             req.tokenObj = {
-              authToken: authtoken,
-              deviceToken: req.body.device_token,
+              token: authtoken,
+              userId: user.id,
               // appType : req.params.user == "user"? "customer" : "vendor"
             }
-            //let token = await wagner.get('Tokens')["insert"](req, res);
+            console.log("req.tokenObj", req.tokenObj)
+            let token = await wagner.get('Users')["insertToken"](req, res);
             /* req.userObj = {
               filter: {
                 _id: user._id
@@ -144,7 +145,7 @@ module.exports = function (app, wagner) {
 
             res.status(HTTPStatus.OK).json({
               success: '1', message: "success", data: {
-                authtoken, profile:user
+                authtoken, profile: user
               }
             });
           } else {

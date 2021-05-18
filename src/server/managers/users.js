@@ -6,7 +6,7 @@ const _ = require('underscore');
 module.exports = class Users {
 
   constructor(wagner) {
-    //this.Token = wagner.get("Token");
+    this.Token = wagner.get("tokens");
     this.User = wagner.get("user");
 
   };
@@ -57,6 +57,17 @@ module.exports = class Users {
     return new Promise(async (resolve, reject) => {
       try {
         let user = await this.User.create(req.userObj);
+        resolve(user);
+      } catch (error) {
+        console.log(error);
+        reject(error);
+      }
+    });
+  };
+  insertToken(req) {
+    return new Promise(async (resolve, reject) => {
+      try {
+        let user = await this.Token.create(req.tokenObj);
         resolve(user);
       } catch (error) {
         console.log(error);
