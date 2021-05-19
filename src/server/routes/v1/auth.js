@@ -42,6 +42,7 @@ module.exports = function (app, wagner) {
           lastName: req.body.lastName,
           email: req.body.email,
           phone: req.body.phone,
+          roleId: req.body.roleId,
           password: md5(req.body.password),
           image_path: req.file.path,
         }
@@ -104,7 +105,7 @@ module.exports = function (app, wagner) {
           }
           let vendorlist = []
           let user = await wagner.get('Users')["find"](req);
-        
+
           if (user) {
             req.user_id = user._id
 
@@ -231,30 +232,30 @@ module.exports = function (app, wagner) {
 
   // role : any
   // function :  signout
-  /*  app.post('/v1/auth/:user/signout',[ check('device_token').exists()],authMiddleware['verifyAccessToken'].bind(authMiddleware),async function(req, res) {
- 
-     try{
-       const errors = validationResult(req);
-       if (!errors.isEmpty()) {
-         let lasterr = errors.array().pop();
-         lasterr.message = lasterr.msg + ": " + lasterr.param.replace("_"," ");
-         return res.status(405).json({ success: '0', message: "failure", data: lasterr });
-       }else{
-         let token = await wagner.get('Tokens')["remove"](req,res);
-         // console.log(token)
-         if(token.deletedCount > 0){
-           return res.status(200).json({ success: '1', message: "success", data:{} });
-         }else{
-           return res.status(403).json({ success: '0', message: "failure", data:{"message":'Invalid device token!'} });
-         }
-       }
-     }
-     catch(e){
- 
-       res.status(500).json({ success: '0', message: "failure", data: e });
-     }
- 
-   }); */
+  app.post('/v1/auth/:user/signout', authMiddleware['verifyAccessToken'].bind(authMiddleware), async function (req, res) {
+
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        let lasterr = errors.array().pop();
+        lasterr.message = lasterr.msg + ": " + lasterr.param.replace("_", " ");
+        return res.status(405).json({ success: '0', message: "failure", data: lasterr });
+      } else {
+        let token = await wagner.get('Users')["removeToken"](req, res);
+         console.log("token",token)
+        if (token > 0) {
+          return res.status(200).json({ success: '1', message: "success", data: {} });
+        } else {
+          return res.status(403).json({ success: '0', message: "failure", data: { "message": 'Invalid device token!' } });
+        }
+      }
+    }
+    catch (e) {
+
+      res.status(500).json({ success: '0', message: "failure", data: e });
+    }
+
+  });
 
   // role : any
   // function :  sends reset link to email
@@ -421,9 +422,14 @@ module.exports = function (app, wagner) {
       res.status(500).json({ success: '0', message: "failure", data: [error.message.toString()] });
     }
   });
-  app.post('/v1/auth/:user/verify_token', async function (req, res) {
-    console.log("dfd")
-    const verify = await wagner.get('auth')["verifyActivationToken"](req, res)
-    res.status(200).json(verify)
+  app.post('/v1/auth/:user/verify_token', authMiddleware['verifyAccessToken'].bind(authMiddleware), async function (req, res) {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      let lasterr = errors.array().pop();
+      lasterr.message = lasterr.msg + ": " + lasterr.param.replace("_", " ");
+      return res.status(405).json({ success: '0', message: "failure", data: lasterr });
+    } else {
+      res.status(200).json("success")
+    }
   });
 };

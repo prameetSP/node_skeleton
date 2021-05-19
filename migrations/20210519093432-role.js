@@ -2,7 +2,7 @@
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    return queryInterface.createTable('tokens',
+    return queryInterface.createTable('roles',
       {
         id: {
           type: Sequelize.INTEGER(20),
@@ -18,28 +18,21 @@ module.exports = {
         updatedAt: {
           type: Sequelize.DATE
         },
-        token: {
-          type: Sequelize.STRING(255),
-          allowNull: false,
-          unique: true,
-        },
-        userId: {
-          type: Sequelize.STRING,
-          allowNull: false,
-          
+        roleName: {
+          type: Sequelize.STRING
         },
         is_active: {
           type: Sequelize.BOOLEAN,
           allowNull: true
         },
-      },
-      {
-        engine: 'InnoDB',    // default: 'InnoDB'
-        schema: '',    // default: public, PostgreSQL only.
-        comment: 'token table', // comment for table
-        collate: 'utf8_general_ci' // collation, MYSQL only
-      }
-    )
+      }, {
+
+      engine: 'InnoDB',    // default: 'InnoDB'
+      schema: '',    // default: public, PostgreSQL only.
+      comment: 'roles table', // comment for table
+      collate: 'utf8_general_ci' // collation, MYSQL only
+
+    })
   },
 
   down: async (queryInterface, Sequelize) => {

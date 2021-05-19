@@ -18,14 +18,18 @@ module.exports = {
         type: Sequelize.STRING
       },
       phone: {
-        type: Sequelize.INTEGER,
+        type: Sequelize.STRING(20),
         unique: true,
         allowNull: true
       },
       email: {
-        type: Sequelize.INTEGER,
+        type: Sequelize.STRING(20),
         unique: true,
         allowNull: true
+      },
+      roleId: {
+        type: Sequelize.INTEGER,
+        allowNull: false
       },
       country_code: {
         type: Sequelize.STRING,

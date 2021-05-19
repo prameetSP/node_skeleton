@@ -1,5 +1,6 @@
 const Promise = require('bluebird');
 const config = require('config');
+const { include } = require('underscore');
 //const mailconf  = config.get("email");
 const _ = require('underscore');
 
@@ -8,6 +9,7 @@ module.exports = class Users {
   constructor(wagner) {
     this.Token = wagner.get("tokens");
     this.User = wagner.get("user");
+    this.roles = wagner.get("roles");
 
   };
 
@@ -90,8 +92,10 @@ module.exports = class Users {
 
   find(req) {
     return new Promise(async (resolve, reject) => {
+      let role=this.roles
       try {
-        let user = await this.User.findOne({ where: req.userObj })
+        let user = await this.User.findOne({ where: req.userObj, include: { model:role,
+          as: 'roles'} })
         resolve(user)
       } catch (error) {
         console.log(error);
@@ -237,6 +241,16 @@ module.exports = class Users {
     return new Promise(async (resolve, reject) => {
       try {
         let card = await this.Card.find({ user: req.user_id })
+        resolve(card)
+      } catch (error) {
+        reject(error);
+      }
+    })
+  }
+  removeToken(req) {
+    return new Promise(async (resolve, reject) => {
+      try {
+        let card = await this.Token.destroy({ where: { token: req.headers.authtoken } })
         resolve(card)
       } catch (error) {
         reject(error);

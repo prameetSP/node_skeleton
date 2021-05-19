@@ -1,93 +1,93 @@
 let jwt = require('jsonwebtoken');
-const config    = require('config');
-const token_config  = config.get('JWT');
+const config = require('config');
+const token_config = config.get('JWT');
 const HTTPStatus = require('http-status');
 
-module.exports  =  class AuthMiddleware  {
+module.exports = class AuthMiddleware {
 
- /*  constructor(wagner){
-    this.userToken = wagner.get('Tokens')
-    this.VendorUsers = wagner.get('VendorUsers')
+  constructor(wagner) {
+    this.userToken = wagner.get('tokens')
+    //this.VendorUsers = wagner.get('VendorUsers')
     // this.role      = wagner.get('MasterRole')
-  }; */
+  };
 
-  generateAccessToken(req,res){
-    return new Promise(async ( resolve,reject)=>{
-      jwt.sign({ "id":  req.user_id   }, token_config.SECRET, { expiresIn: token_config.TOKENTIME  },
-      function(err, token) {
-        if(err){
-          console.log(err)
-          reject(err)
-        } else {
-          resolve(token);
-        }
-      });
+  generateAccessToken(req, res) {
+    return new Promise(async (resolve, reject) => {
+      jwt.sign({ "id": req.user_id }, token_config.SECRET, { expiresIn: token_config.TOKENTIME },
+        function (err, token) {
+          if (err) {
+            console.log(err)
+            reject(err)
+          } else {
+            resolve(token);
+          }
+        });
     })
   }
 
-  generateShortAccessToken(req,res){
+  generateShortAccessToken(req, res) {
 
-    return new Promise(async ( resolve,reject)=>{
-      jwt.sign({ "id":  req.user_id }, token_config.SECRET, { expiresIn: 600 },
-      function(err, token) {
-        if(err){
-          console.log(err)
-          reject(err)
-        } else {
-          resolve(token);
-        }
-      });
+    return new Promise(async (resolve, reject) => {
+      jwt.sign({ "id": req.user_id }, token_config.SECRET, { expiresIn: 600 },
+        function (err, token) {
+          if (err) {
+            console.log(err)
+            reject(err)
+          } else {
+            resolve(token);
+          }
+        });
     })
   }
 
-  verifyActivationToken(req,res){
-   return new Promise(( resolve,reject)=>{
-    // console.log(token_config.SECRET)
-      jwt.verify(req.headers.authorization,token_config.SECRET, function(err, decoded) {
-       // console.log("dffd",decoded )
-        if(err){
+  verifyActivationToken(req, res) {
+    return new Promise((resolve, reject) => {
+      // console.log(token_config.SECRET)
+      jwt.verify(req.headers.authorization, token_config.SECRET, function (err, decoded) {
+        // console.log("dffd",decoded )
+        if (err) {
           console.log(err)
-          if(err.name == 'TokenExpiredError'){
+          if (err.name == 'TokenExpiredError') {
             resolve({ success: 0, message: "Token expired!" });
-          }else{
+          } else {
             resolve({ success: 0, message: "Invalid token!" });
           }
-        }else{
+        } else {
           // console.log(decoded)
-          resolve({ success: 1 , user_id : decoded.id });
+          resolve({ success: 1, user_id: decoded.id });
         }
       });
-     })
+    })
   }
 
- /*  verifyAccessToken (req,res,next){
+  verifyAccessToken(req, res, next) {
 
-    jwt.verify(req.headers.authtoken,token_config.SECRET, (err, decoded)=> {
-      if(err){
-        if(err.name == 'TokenExpiredError'){
-          res.status(406).json({ success: '0',  message: "failure" , data :{"message": "Token expired!"} });
+    jwt.verify(req.headers.authtoken, token_config.SECRET, (err, decoded) => {
+      if (err) {
+        if (err.name == 'TokenExpiredError') {
+          res.status(406).json({ success: '0', message: "failure", data: { "message": "Token expired!" } });
         } else {
-          res.status(403).json({ success: '0',  message: "failure" ,data:{ "message": "Invalid token!"} });
+          res.status(403).json({ success: '0', message: "failure", data: { "message": "Invalid token!" } });
         }
-      }else{
-        this.userToken["find"](req).then(function(result) {
-          if(result){
+      } else {
+        this.userToken.findOne({ where: {token:req.headers.authtoken} }).then(function (result) {
+          if (result) {
             req.user_id = decoded.id;
             // console.log(decoded)
             next();
-          }else{
-            res.status(403).json({ success: '0',  message: "failure" ,data:{ "message": "Invalid token!"}});
+          } else {
+            res.status(403).json({ success: '0', message: "failure", data: { "message": "Invalid token!" } });
           }
-        }).catch(function(error){
-          console.log("error",error);
+        }).catch(function (error) {
+          console.log("error", error);
           res.status(500).json({ success: '0', message: "failure", data: error });
         });
       }
 
     });
   }
-  
-  verifyVendorAdminAccess(req,res,next){
+
+  /*verifyVendorAdminAccess(req,res,next){
     if(req.body.vendorId){
       req.body.vendor_id = req.body.vendorId
     }

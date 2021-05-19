@@ -1,5 +1,6 @@
 'use strict';
 const Sequelize = require('sequelize');
+const roles = require('./roles');
 
 module.exports = function (sequelize, DataTypes) {
   var User = sequelize.define("user",
@@ -20,12 +21,16 @@ module.exports = function (sequelize, DataTypes) {
         type: Sequelize.STRING
       },
       phone: {
-        type: Sequelize.STRING,
+        type: Sequelize.STRING(20),
         unique: true,
         allowNull: true
       },
+      roleId: {
+        type: Sequelize.INTEGER,
+        allowNull: false
+      },
       email: {
-        type: Sequelize.STRING,
+        type: Sequelize.STRING(20),
         unique: true,
         allowNull: true
       },
@@ -55,9 +60,13 @@ module.exports = function (sequelize, DataTypes) {
     createdAt: 'createdAt',
     updatedAt: 'updatedAt',
     classMethods: {}
-  })
+  });
 
-
+  User.associate = function (models){
+    User.belongsTo(models.roles,{
+      as: 'roles', targetKey: 'id', foreignKey:'roleId'
+    });
+  }
 
   return User;
 };
