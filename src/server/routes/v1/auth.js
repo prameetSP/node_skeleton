@@ -44,7 +44,10 @@ module.exports = function (app, wagner) {
           phone: req.body.phone,
           roleId: req.body.roleId,
           password: md5(req.body.password),
-          image_path: req.file.path,
+
+        }
+        if (req.file) {
+          req.userObj.image_path = req.file.path
         }
         let user = await wagner.get('Users')["insert"](req)
 
@@ -242,7 +245,7 @@ module.exports = function (app, wagner) {
         return res.status(405).json({ success: '0', message: "failure", data: lasterr });
       } else {
         let token = await wagner.get('Users')["removeToken"](req, res);
-         console.log("token",token)
+        console.log("token", token)
         if (token > 0) {
           return res.status(200).json({ success: '1', message: "success", data: {} });
         } else {
