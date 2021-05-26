@@ -38,7 +38,7 @@ module.exports = function (sequelize, DataTypes) {
         tableName: 'products',
         timestamps: true,
         createdAt: 'createdAt',
-        updatedAt: 'updateAt',
+        updatedAt: 'updatedAt',
         classMethod: {},
         scopes: {
             active: { where: { is_active: true } },

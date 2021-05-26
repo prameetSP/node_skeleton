@@ -2,7 +2,7 @@ const { async } = require('async');
 const Promise = require('bluebird');
 const config = require('config');
 const { request } = require('express');
-const { where } = require('sequelize/types');
+//const { where } = require('sequelize/types');
 const { include } = require('underscore');
 const _ = require('underscore');
 const Sequelize = require('sequelize');
@@ -11,7 +11,7 @@ const Op = Sequelize.Op;
 module.exports = class product {
     constructor(wagner) {
         this.category = wagner.get("category");
-        this.product = wagner.get("product");
+        this.product = wagner.get("products");
     };
     insert(req) {
         return new Promise(async (resolve, reject) => {
@@ -36,8 +36,8 @@ module.exports = class product {
     delete(req) {
         return new Promise(async (resolve, reject) => {
             try {
-                let produc_data = await this.product.destroy({ where: { id: req.id } })
-                resolve(produc_data);
+                let product_data = await this.product.destroy({ where: { id: req.id } })
+                resolve(product_data);
             } catch (error) {
                 reject(error);
 
@@ -52,7 +52,7 @@ module.exports = class product {
                 }
                 let page = req.query.page;
                 let limit = 25;
-                let skip = ((page - 1) * limit);
+                let offset = ((page - 1) * limit);
                 let conds = {};
                 let filtering = {}
                 if (req.query.hasOwnProperty('search')) {
@@ -76,6 +76,7 @@ module.exports = class product {
                 }
                 if (req.query.hasOwnProperty('search') && req.query.hasOwnProperty('filter')) {
                     conds = {
+                        offset: offset, limit: limit,
                         where:
                             [{
                                 $or: [
@@ -90,7 +91,10 @@ module.exports = class product {
                             }]
                     }
                 }
-                let product_data = await this.product.find(conds).skip(skip).limit(limit)
+                else {
+                    conds = { offset: offset, limit: limit }
+                }
+                let product_data = await this.product.findAll(conds)
                 let count = await this.product.count(conds)
                 resolve({
                     list: product_data, meta: {
