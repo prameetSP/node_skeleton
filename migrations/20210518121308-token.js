@@ -30,7 +30,8 @@ module.exports = {
         },
         is_active: {
           type: Sequelize.BOOLEAN,
-          allowNull: true
+          allowNull: true,
+          defaultValue:true
         },
       },
       {

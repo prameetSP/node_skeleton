@@ -33,9 +33,9 @@ module.exports = function (app, wagner) {
                 return res.status(405).json({ success: '0', message: "failure", data: lasterr })
             } else {
                 req.productObj = {
-                    product_Name: req.body.product_Name,
+                    product_name: req.body.product_name,
                     category_id: req.body.category_id,
-                    image_path: req.file.path,
+                    image: req.file.path,
                     quantity: req.body.quantity
 
                 }

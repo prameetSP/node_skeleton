@@ -24,6 +24,10 @@ module.exports = function (sequelize, DataTypes) {
             type: Sequelize.INTEGER,
             allowNull: false
         },
+        image: {
+            type: Sequelize.STRING(255),
+            allowNull: true
+        },
         is_active: {
             type: Sequelize.BOOLEAN,
             defualts: true

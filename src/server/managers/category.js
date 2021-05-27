@@ -1,10 +1,8 @@
 const { asysnc, reject } = require('async');
-const { resolve } = require('bluebird');
 const Promise = require('bluebird');
 const config = require('config');
 const request = require('express');
 const _ = require('underscore');
-const { search } = require('../../app');
 const Sequelize = require('sequelize');
 const Op = Sequelize.Op;
 

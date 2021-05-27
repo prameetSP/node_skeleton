@@ -57,45 +57,48 @@ module.exports = class product {
                 let filtering = {}
                 if (req.query.hasOwnProperty('search')) {
                     let search = req.query.search.trim();
-                    if (search.length) {
+                    if (search != null && search != '') {
                         conds = {
+                            offset: offset, limit: limit,
                             where:
                             {
-                                $or: [
+                                [Op.or]: [
                                     { product_name: { [Op.like]: '%' + search + '%' } },
-                                    { category_name: { [Op.like]: '%' + search + '%' } }
-                                ],
+                                    { '$category.category_name$': { [Op.like]: '%' + search + '%' } },
+                                ]
                             }
                         }
 
                     }
                 }
-
-                if (req.query.hasOwnProperty('filter')) {
+                else if (req.query.hasOwnProperty('filter')) {
                     conds = { where: { category_id: request.query.category_id } }
                 }
-                if (req.query.hasOwnProperty('search') && req.query.hasOwnProperty('filter')) {
+                else if (req.query.hasOwnProperty('search') && req.query.hasOwnProperty('filter')) {
                     conds = {
                         offset: offset, limit: limit,
                         where:
-                            [{
-                                $or: [
-                                    { product_name: { [Op.like]: '%' + search + '%' } },
-                                    { category_name: { [Op.like]: '%' + search + '%' } }
-                                ],
-                            },
-                            {
-                                $and: {
-                                    category_id: request.query.category_id
-                                }
-                            }]
+                            [
+                                {
+                                    $or: [
+                                        { product_name: { [Op.like]: '%' + search + '%' } },
+                                        { category_name: { [Op.like]: '%' + search + '%' } }
+                                    ],
+                                },
+                                {
+                                    $and: {
+                                        category_id: request.query.category_id
+                                    }
+                                }]
                     }
                 }
                 else {
                     conds = { offset: offset, limit: limit }
                 }
+
+                conds = { ...{ include: { model: this.category, as: 'category' }, ...conds } }
                 let product_data = await this.product.findAll(conds)
-                let count = await this.product.count(conds)
+                let count = await this.product.count()
                 resolve({
                     list: product_data, meta: {
                         total_pages: Math.ceil(count / limit),
