@@ -3,7 +3,7 @@
     "username": "root",
     "password": "nodeJs123",
     "database": "node_skeleton",
-    "host": "127.0.0.1",
+    "host": "aahd0g4qvbnwzq.cvd3esvflamb.us-east-1.rds.amazonaws.com",
     "dialect": "mysql"
   },
   "test": {
